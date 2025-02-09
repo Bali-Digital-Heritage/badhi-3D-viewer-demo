@@ -7,7 +7,7 @@ import * as pc from "playcanvas";
 document.addEventListener("DOMContentLoaded", async () => {
   const appElement = await document.querySelector("pc-app").ready();
   const app = await appElement.app;
-  const backgroundColor = new pc.Color(1,1,1,1);
+  const backgroundColor = new pc.Color(1, 1, 1, 1);
   const entityElement = await document
     .querySelector('pc-entity[name="camera"]')
     .ready();
@@ -21,8 +21,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   const templeInfoAsset = app.assets.find("temple-info");
   const logoAsset = app.assets.find("texture-logo");
   const panelAsset = app.assets.find("texture-panel");
+  const audioAsset = app.assets.find("pftk");
   const splatEntity = app.root.findByName("splat");
-  splatEntity.setLocalPosition(0, 1, -2);
+  const mainRenderer = app.root.findByName("mainrenderer");
+  const panelParentEntity = app.root.findByName("panelparent");
+  const audioEntity = new pc.Entity("audioSource");
+  const audioId = "pftkaudio";
+  if (audioEntity) {
+    // Add sound component
+    audioEntity.addComponent("sound", {
+      volume: 1,
+      pitch: 1,
+      loop: true,
+    });
+
+    // Add the audio asset
+    audioEntity.sound.addSlot(audioId, {
+      asset: audioAsset,
+      volume: 1,
+      pitch: 1,
+      loop: true,
+    });
+
+   // audioEntity.sound.play('pftk');
+
+  }
+
+  // Add to parent entity
+  splatEntity.addChild(audioEntity);
+
+  mainRenderer.setLocalPosition(0, 1.4, -0.6);
+  splatEntity.addComponent("script");
+  splatEntity.script.create("rotateEntity");
 
   function createInformationPanel(bbox, templeInfo) {
     // Create text
@@ -34,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       function (err, asset) {
         const fontAssetId = asset.id;
         //Parameters
-        const panelScale = 0.0015;
+        const panelScale = 0.001;
         const mainTextFontSize = 16;
         const secondaryTextFontSize = 8;
         const bodyTextFontSize = 6;
@@ -55,10 +85,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
 
         const panelBgConfig = {
-          width: 2384,
+          width: 2584,
           height: 835,
           scale: 0.11,
-          color: new pc.Color(0.1, 0.1, 0.1),
+          color: new pc.Color(0, 0, 0),
           localPosition: {
             x: -112,
             y: -56,
@@ -105,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           width: panelBgConfig.width * panelBgConfig.scale,
           height: panelBgConfig.height * panelBgConfig.scale,
           opacity: 0.7,
-          color: panelBgConfig.color
+          color: panelBgConfig.color,
         });
 
         // Create Parent
@@ -156,7 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Add to parent
         panelParent.setLocalScale(panelScale, panelScale, panelScale);
-        panelParent.setEulerAngles(0, 180, 180);
+        panelParent.setEulerAngles(0, 0, 0);
         panelParent.addChild(panelBackgroundEntity);
         panelParent.addChild(logoEntity);
         panelParent.addChild(mainTextEntity);
@@ -184,20 +214,32 @@ document.addEventListener("DOMContentLoaded", async () => {
           panelBgConfig.localPosition.x,
           panelBgConfig.localPosition.y,
           panelBgConfig.localPosition.z
-        )
+        );
 
-        if (splatEntity) {
-          splatEntity.addChild(panelParent);
-          panelParent.setLocalPosition(
-            0,
-            -bbox.halfExtents.y * 0.1,
-            -bbox.halfExtents.z
-          );
-        }
+        // Position the cube slightly in front of the panel
+        panelParentEntity.setLocalPosition(
+          0,
+          bbox.halfExtents.y * -0.15,
+          bbox.halfExtents.z
+        );
+
+        panelParentEntity.addChild(panelParent);
       }
     );
     //end create text
   }
+
+  var rotationSpeed = 1;
+  class RotateEntity extends pc.Script {
+    initialize() {
+      this.rotationSpeed = rotationSpeed;
+    }
+
+    update(dt) {
+      this.entity.rotate(0, this.rotationSpeed * dt, 0);
+    }
+  }
+  pc.registerScript(RotateEntity, "rotateEntity");
 
   class FrameScene extends pc.Script {
     frameScene(bbox) {
@@ -208,7 +250,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const c = new pc.Vec3(bbox.center.x + 0.2, bbox.center.y, bbox.center.z);
       this.entity.script.cameraControls.focus(
         c,
-        new pc.Vec3(0.5, 0.2, 2).normalize().mulScalar(distance).add(bbox.center)
+        new pc.Vec3(0.5, 0.2, 2)
+          .normalize()
+          .mulScalar(distance)
+          .add(bbox.center)
       );
     }
 
@@ -330,7 +375,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Add VR button if available
-/** if (app.xr.isAvailable("immersive-vr")) {
+  /** if (app.xr.isAvailable("immersive-vr")) {
     const vrButton = createButton({
       icon: `VR`,
       title: "Enter VR",
@@ -347,7 +392,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     container.appendChild(vrButton);
   }
-     */ 
+     */
 
   // Add AR button if available
   if (app.xr.isAvailable("immersive-ar")) {
@@ -356,8 +401,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       title: "Enter AR",
       onClick: async () => {
         try {
-          if(panelParent == null) createInformationPanel(bbox, templeInfoAsset.resources[0]);
-          entity.camera.clearColor = new pc.Color(0,0,0,0);
+          if (panelParent == null)
+            createInformationPanel(bbox, templeInfoAsset.resources[0]);
+          audioEntity.sound.play(audioId);
+          entity.camera.clearColor = new pc.Color(0, 0, 0, 0);
           app.xr.start(
             app.root.findComponent("camera"),
             "immersive-ar",
@@ -376,7 +423,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (event.key === "Escape") {
       app.xr.end();
       entity.camera.clearColor = backgroundColor;
-
     }
   });
 

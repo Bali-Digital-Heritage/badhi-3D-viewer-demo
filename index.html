@@ -18,40 +18,40 @@
             }
         </script>
         <style>
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
 
-        .video-container {
-            position: relative;
-            max-width: 800px;
-        }
+            .video-container {
+                position: relative;
+                max-width: 800px;
+            }
 
-        .close-btn {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 8px;
-        }
+            .close-btn {
+                position: absolute;
+                top: -40px;
+                right: 0;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                background: none;
+                border: none;
+                padding: 8px;
+            }
 
-        video {
-            height: 100%;
-        }
-    </style>
+            video {
+                height: 100%;
+            }
+        </style>
         <style>
             body {
                 font-family: "Poppins", serif;
@@ -99,19 +99,19 @@
         <script type="module" src="https://cdn.jsdelivr.net/npm/@playcanvas/web-components@0.1.10/dist/pwc.mjs"></script>
     </head>
     <body>
-    <!-- video -->
+        <!-- video -->
 
-    <!-- Video Overlay -->
-    <div class="overlay" id="videoOverlay">
-        <div class="video-container">
-            <button class="close-btn" id="closeBtn">X</button>
-            <video id="videoPlayer" controls>
-                <source src="./assets/video.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+        <!-- Video Overlay -->
+        <div class="overlay" id="videoOverlay">
+            <div class="video-container">
+                <button class="close-btn" id="closeBtn">X</button>
+                <video id="videoPlayer" controls="controls">
+                    <source src="./assets/video.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
         </div>
-    </div>
-<!-- end video --> 
+        <!-- end video -->
 
         <div class="pure-g">
             <div class="pure-u-6-24">
@@ -143,6 +143,7 @@
                     <pc-asset id="temple-info" type="json" src="temple-info.json" preload="true"></pc-asset>
                     <pc-asset id="texture-logo" type="texture" src="./assets/logo.png" preload="true"></pc-asset>
                     <pc-asset id="texture-panel" type="texture" src="./assets/panel-2.png" preload="true"></pc-asset>
+                    <pc-asset id="pftk" type="audio" src="pftk.mp3" preload="true"></pc-asset>
 
                     <pc-scene>
                         <!-- Camera (with XR support) -->
@@ -154,8 +155,7 @@
                                 </pc-scripts>
                             </pc-entity>
                             <pc-scripts>
-                               <!-- <pc-script name="xrControllers"></pc-script>
-                                <pc-script name="xrNavigation"></pc-script> -->
+                                <!-- <pc-script name="xrControllers"></pc-script> <pc-script name="xrNavigation"></pc-script> -->
                             </pc-scripts>
                         </pc-entity>
 
@@ -164,9 +164,18 @@
                             <pc-light color="white" intensity="1.5"></pc-light>
                         </pc-entity>
                         <!-- Splat -->
-                        <pc-entity name="splat" rotation="0 180 180">
-                            <pc-splat asset="ply"></pc-splat>
+                        <pc-entity name="mainrenderer">
+                            <pc-entity name="splat" rotation="0 180 180">
+                                <pc-splat asset="ply"></pc-splat>
+                            </pc-entity>
+                            <pc-entity name="panelparent">
+                            </pc-entity>
+                              <!-- Add sound component -->
+                            <pc-entity name="audioSource">
+                                <pc-sound asset="pftk" volume="1" pitch="1" loop="true"></pc-sound>
+                            </pc-entity>
                         </pc-entity>
+
                     </pc-scene>
                 </pc-app>
                 <div>
@@ -218,41 +227,41 @@
                     </div>
                 </div>
                 <script type="module" src="script.js"></script>
-                <!-- video script --> 
-                
-    <script>
-        const videoLink = document.getElementById('videoLink');
-        const videoOverlay = document.getElementById('videoOverlay');
-        const closeBtn = document.getElementById('closeBtn');
-        const videoPlayer = document.getElementById('videoPlayer');
+                <!-- video script -->
 
-        // Open overlay
-        videoLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            videoOverlay.style.display = 'flex';
-        });
+                <script>
+                    const videoLink = document.getElementById('videoLink');
+                    const videoOverlay = document.getElementById('videoOverlay');
+                    const closeBtn = document.getElementById('closeBtn');
+                    const videoPlayer = document.getElementById('videoPlayer');
 
-        // Close overlay
-        closeBtn.addEventListener('click', () => {
-            videoOverlay.style.display = 'none';
-            videoPlayer.pause(); // Stop video when closing
-        });
+                    // Open overlay
+                    videoLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        videoOverlay.style.display = 'flex';
+                    });
 
-        // Close overlay when clicking outside video
-        videoOverlay.addEventListener('click', (e) => {
-            if (e.target === videoOverlay) {
-                videoOverlay.style.display = 'none';
-                videoPlayer.pause();
-            }
-        });
+                    // Close overlay
+                    closeBtn.addEventListener('click', () => {
+                        videoOverlay.style.display = 'none';
+                        videoPlayer.pause(); // Stop video when closing
+                    });
 
-        // Close on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && videoOverlay.style.display === 'flex') {
-                videoOverlay.style.display = 'none';
-                videoPlayer.pause();
-            }
-        });
-    </script>
+                    // Close overlay when clicking outside video
+                    videoOverlay.addEventListener('click', (e) => {
+                        if (e.target === videoOverlay) {
+                            videoOverlay.style.display = 'none';
+                            videoPlayer.pause();
+                        }
+                    });
+
+                    // Close on escape key
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && videoOverlay.style.display === 'flex') {
+                            videoOverlay.style.display = 'none';
+                            videoPlayer.pause();
+                        }
+                    });
+                </script>
             </body>
         </html>
