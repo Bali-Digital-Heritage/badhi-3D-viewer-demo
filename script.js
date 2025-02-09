@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           splatEntity.addChild(panelParent);
           panelParent.setLocalPosition(
             0,
-            -bbox.halfExtents.y * 0.5,
+            -bbox.halfExtents.y * 0.1,
             -bbox.halfExtents.z
           );
         }
