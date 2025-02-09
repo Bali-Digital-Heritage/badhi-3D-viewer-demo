@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       function (err, asset) {
         const fontAssetId = asset.id;
         //Parameters
-        const panelScale = 0.003;
+        const panelScale = 0.0015;
         const mainTextFontSize = 16;
         const secondaryTextFontSize = 8;
         const bodyTextFontSize = 6;
@@ -330,7 +330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Add VR button if available
-  if (app.xr.isAvailable("immersive-vr")) {
+/** if (app.xr.isAvailable("immersive-vr")) {
     const vrButton = createButton({
       icon: `VR`,
       title: "Enter VR",
@@ -347,6 +347,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     container.appendChild(vrButton);
   }
+     */ 
 
   // Add AR button if available
   if (app.xr.isAvailable("immersive-ar")) {
